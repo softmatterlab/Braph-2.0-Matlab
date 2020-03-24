@@ -8,28 +8,40 @@ classdef MeanFirstPassageTime < Measure
         end
     end
     methods (Access=protected)
-        function MFPT = calculate(m)
+        function mean_first_passage_time = calculate(m)
             g = m.getGraph();
             A = g.getA();
             
-            P = diag(sum(A,2))\A; % matrix of transition probabilities by solving B*p=A the system linear equations
-            tol = 10^(-3); % tolerance to find value of 1 at the eigenvector.
-            n = length(P); % number of nodes.
+            % Get the matrix P, which is transition probabilities
+            % by solving B*P=A the system linear equations.
+            B = diag(sum(A,2));
+            P = B\A;
+            if(sum(isnan(P))>0)
+                error('cannot find transition probabilities');
+            end
+            % Set the tolerance to find the closest value to 1 at the eigenvalue.
+            tol = 10^(-3); 
+            n = length(P);
             
-            [V,D_eigenvalue] = eig(P');  % diagonal matrix D_eigenvalue of eigenvalues. The columns of matrix V are the corresponding eigenvectors,so that P'*V = V*D_eigenvalue.
+            % Get diagonal matrix D_eigenvalue of eigenvalues.
+            % The columns of matrix V are the corresponding eigenvectors,
+            % so that P'*V = V*D_eigenvalue
+            [V,D_eigenvalue] = eig(P');
             aux = abs(diag(D_eigenvalue)-1);
-            index = find(aux==min(aux));
+            
+            % Get the index of whom is closest to 1.
+            index = find(aux==min(aux)); 
             
             if aux(index)>tol
                 error('cannot find eigenvalue of 1. Minimum eigenvalue value is %0.6f. Tolerance was set at %0.6f',aux(index)+1,tol);
             end
 
-            w = V(:,index)'; % eigenvector associated to eigenvalue of 1.
-            w = w/sum(w); % rescale the eigenvector to its sum of it.
-            W = repmat(w,n,1); % convert column-vector w to a full matrix W by making copies of w.
-            I = eye(n,n); % identity matrix I with rank n
-            Z = inv(I-P+W); % fundamental matrix Z is computed
-            MFPT = (repmat(diag(Z)',n,1)-Z)./W;
+            w = V(:,index)'; % Get eigenvector associated to eigenvalue of 1.
+            w = w/sum(w); % Rescale the eigenvector to its sum.
+            W = repmat(w,n,1); % Convert column-vector w to a full matrix W by making copies of w.
+            I = eye(n,n); % Get identity matrix I with rank n.
+            Z = inv(I-P+W); % Get fundamental matrix Z.
+            mean_first_passage_time = (repmat(diag(Z)',n,1)-Z)./W;
         end
     end
     methods (Static)
@@ -41,7 +53,7 @@ classdef MeanFirstPassageTime < Measure
         end
         function description = getDescription()
             description = [ ...
-                'The first passage time is ' ...
+                'The mean first passage time is ' ...
                 'the expected number of steps it takes a random walker to reach one node from another. ' ...
                 ];
         end
