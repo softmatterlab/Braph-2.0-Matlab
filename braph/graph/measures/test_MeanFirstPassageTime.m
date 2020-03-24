@@ -1,29 +1,29 @@
 % test MeanFirstPassageTime
-A = rand(randi(5));
 graph_class_list = Graph.getList();
 
 %% Test 1: Calculation AllGraphs
-% for i = 1:1:length(graph_class_list)
-%     graph_class = graph_class_list{i};
-%     g = Graph.getGraph(graph_class, A);
-%     MFPT = MeanFirstPassageTime(g);
-%     value = MFPT.getValue();
-%     
-%     assert(~isempty(value), ...
-%         ['BRAPH:' graph_class ':MeanFirstPassageTime'], ...
-%         ['MeanFirstPassageTime is not calculated for ' graph_class])
-%     
-%     assert(isequal(size(value), size(g.getA())), ...
-%         ['BRAPH:MeanFirstPassageTime: ' graph_class], ...
-%         ['MeanFirstPassageTime dim is not correct for ' graph_class])
-% end
+for i = 1:1:length(graph_class_list)
+    graph_class = graph_class_list{i};
+    A = rand(randi([2 5]));
+    g = Graph.getGraph(graph_class, A);
+    MFPT = MeanFirstPassageTime(g);
+    value = MFPT.getValue();
+    
+    assert(~isempty(value), ...
+        ['BRAPH:' graph_class ':MeanFirstPassageTime'], ...
+        ['MeanFirstPassageTime is not calculated for ' graph_class])
+    
+    assert(isequal(size(value), size(g.getA())), ...
+        ['BRAPH:MeanFirstPassageTime: ' graph_class], ...
+        ['MeanFirstPassageTime dim is not correct for ' graph_class])
+end
 
 %% Test 2: Calculation vs Known Values
 for i = 1:1:length(graph_class_list)
     graph_class = graph_class_list{i};
     L = [
-        0 .2; 
-        .1 0; 
+         0  .1  
+        .5   0
         ];
     g = Graph.getGraph(graph_class, L);
     MFPT = MeanFirstPassageTime(g);
@@ -43,9 +43,10 @@ end
 for i = 1:1:length(graph_class_list)
     graph_class = graph_class_list{i};
     L = [
-        0 .2 0 ; 
-        .1 0 .1; 
-        .1 .1 0 ; 
+        0 .1  0  0
+       .2  0 .1  0
+        0 .1  0 .2
+        0  0 .1  0
         ];
     g = Graph.getGraph(graph_class, L);
     A = g.getA();
