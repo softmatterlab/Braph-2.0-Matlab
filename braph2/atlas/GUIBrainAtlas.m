@@ -777,7 +777,12 @@ init_contextmenus()
         ba.brain('FaceAlpha', get(ui_slider_figure_brainalpha, 'Value'))
         
         % brain regions
-        if get(ui_checkbox_figure_br, 'Value') & ~isequal(action_case, {'remove'})
+        if get(ui_checkbox_figure_br, 'Value')& ~isequal(action_case, {'remove'})
+            if ba.is_syms_empty() || ~isequal(ba.get_sym_length(), atlas.getBrainRegions().length() )
+                ba = atlas.getPlotBrainAtlas();
+                ba.br_syms()
+            end
+                
             ba.br_syms_on()
             for i = 1:1:atlas.getBrainRegions().length()
                 X = atlas.getBrainRegions().getValue(i).getX();

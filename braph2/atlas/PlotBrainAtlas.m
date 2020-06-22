@@ -712,6 +712,16 @@ classdef PlotBrainAtlas < PlotBrainSurf
                 end
             end
         end
+        function is_empty = is_syms_empty(ba)
+            if ~isempty(ba.syms)
+                is_empty = 0;
+            else
+                is_empty = 1;
+            end
+        end
+        function sym_length = get_sym_length(ba)
+            sym_length = length(ba.syms);
+        end
     end
     methods  % Functions spheres
         function h = br_sph(ba, i, varargin)
