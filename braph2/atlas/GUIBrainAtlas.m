@@ -450,7 +450,7 @@ init_table()
     function cb_table_remove(~, ~)  % (src, event)
         selected = atlas.getBrainRegions().remove_all(selected);
         update_table_table()
-        update_figure_brainview()
+        update_figure_brainview('remove')
     end
     function cb_table_moveup(~, ~)  % (src, event)
         selected = atlas.getBrainRegions().move_up(selected);
@@ -713,7 +713,12 @@ init_contextmenus()
         
         update_figure_brainview()
     end
-    function update_figure_brainview()
+    function update_figure_brainview(varargin)
+        if nargin < 1
+            action_case = 'default';
+        else
+            action_case = varargin(1);
+        end        
         
         if get(ui_checkbox_figure_axis, 'Value')
             ba.axis_on()
@@ -772,7 +777,7 @@ init_contextmenus()
         ba.brain('FaceAlpha', get(ui_slider_figure_brainalpha, 'Value'))
         
         % brain regions
-        if get(ui_checkbox_figure_br, 'Value')
+        if get(ui_checkbox_figure_br, 'Value') & ~isequal(action_case, {'remove'})
             ba.br_syms_on()
             for i = 1:1:atlas.getBrainRegions().length()
                 X = atlas.getBrainRegions().getValue(i).getX();
@@ -810,7 +815,7 @@ init_contextmenus()
                 end
             end
             set(ui_toolbar_br, 'State', 'on');
-        else
+        elseif isequal(action_case, {'remove'})
             ba.br_syms_off()
             set(ui_toolbar_br, 'State', 'off');
         end
