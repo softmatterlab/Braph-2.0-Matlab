@@ -777,7 +777,7 @@ init_contextmenus()
         ba.brain('FaceAlpha', get(ui_slider_figure_brainalpha, 'Value'))
         
         % brain regions
-        if get(ui_checkbox_figure_br, 'Value')& ~isequal(action_case, {'remove'})
+        if get(ui_checkbox_figure_br, 'Value') & ~isequal(action_case, {'remove'})
             if ba.is_syms_empty() || ~isequal(ba.get_sym_length(), atlas.getBrainRegions().length() )
                 ba = atlas.getPlotBrainAtlas();
                 ba.br_syms()
@@ -821,6 +821,8 @@ init_contextmenus()
             end
             set(ui_toolbar_br, 'State', 'on');
         elseif isequal(action_case, {'remove'})
+            ba.br_syms_off(selected)
+        else
             ba.br_syms_off()
             set(ui_toolbar_br, 'State', 'off');
         end

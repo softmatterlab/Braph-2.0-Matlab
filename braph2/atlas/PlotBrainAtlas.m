@@ -722,6 +722,9 @@ classdef PlotBrainAtlas < PlotBrainSurf
         function sym_length = get_sym_length(ba)
             sym_length = length(ba.syms);
         end
+        function remove_sym(ba, i_vec)
+            % ill wait for aprovl
+        end
     end
     methods  % Functions spheres
         function h = br_sph(ba, i, varargin)
