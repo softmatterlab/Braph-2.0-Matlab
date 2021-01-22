@@ -4,16 +4,16 @@ YW_Trial < Element (yw_tr, trial element) is a trial element.
 %% ¡props!
 
 %%% ¡prop!
-a (data, scalar) is a.
+a (data, cvector) is a.
 
 %%% ¡prop!
-b (data, scalar) is b.
+b (data, rvector) is b.
 
 %%% ¡prop!
-res (result, scalar) is result (a - b).
+res (result, MATRIX) is result (a * b).
 
 %%%% ¡calculate!
-value = yw_tr.get('A') - yw_tr.get('B')
+value = yw_tr.get('A') * yw_tr.get('B')
 
 %% ¡tests!
 
