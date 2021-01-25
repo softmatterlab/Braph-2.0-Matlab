@@ -768,7 +768,7 @@ classdef Element < Category & Format & matlab.mixin.Copyable
                     value = el.getr(prop);
                     if isa(value, 'Element')
                         value.lock();
-                    elseif iscell(value) && all(cellfun(@(x) isa(x, 'Element'), value))
+                    elseif iscell(value) && all(all(cellfun(@(x) isa(x, 'Element'), value)))
                         cellfun(@(x) x.lock(), value)
                     end
                 end
