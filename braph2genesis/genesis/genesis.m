@@ -40,7 +40,7 @@ disp(' ')
 % braph2
 mkdir(target_dir)
 
-disp('¡! created target dir')
+disp('¡¡¡! created target dir')
 
 % src
 mkdir([target_dir fp 'src' fp 'util'])
