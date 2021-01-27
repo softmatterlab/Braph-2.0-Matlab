@@ -14,8 +14,6 @@ A (data, cell) is a cell with an adjacency matrix, it is a data, cell.
 
 %%% ¡prop!
 WMPC (result, cell) is the Weighted Multiplex Participation coefficient of A.
-%%%% ¡conditioning!
-
 
 %%%% ¡calculate!
 A = wmp.get('A');
