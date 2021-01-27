@@ -30,7 +30,6 @@ end
 OSR = {overlapping_strength};
 value = OSR;
 
-
 %% ¡tests!
 
 %%% ¡test!
