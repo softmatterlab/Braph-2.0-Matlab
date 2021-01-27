@@ -50,30 +50,40 @@ end
 
 %% ¡methods!
 function str = tostring(idict, varargin)
+    %TOSTRING string with information about the indexed dictionary.
+    %
+    % STR = TOSTRING(IDICT) returns a string with information about the
+    %  indexed dictionary. 
+    %
+    % STR = TOSTRING(IDICT, N) trims the string to the first N characters.
+    %
+    % STR = TOSTRING(IDICT, N, ENDING) ends the string with ENDING if it has
+    %  been trimmed.
+    %
+    % See also disp, tree.
+
 	str = [class(idict) ' with ' int2str(idict.length()) ' ' idict.get('IT_CLASS') '.'];
 end
 % inspection
 function it_class = getItemClass(idict)
-    % GETITEMCLASS returns the item class of the indexed dictionary.
+    %GETITEMCLASS returns the item class of the indexed dictionary.
     %
-    % ITEM_CLASS = GETITEMCLASS(IDICT) returns the item
-    % class of the indexed dictionary.
+    % ITEM_CLASS = GETITEMCLASS(IDICT) returns the item class of the indexed dictionary.
 
     it_class = idict.get('IT_CLASS');
 end
 function n = length(idict)
-    % LENGTH returns the number of items in the indexed dictionary.
+    %LENGTH returns the number of items in the indexed dictionary.
     %
-    % N = LENGTH(IDICT) returns the number of items in the
-    % indexed dictionary.
+    % N = LENGTH(IDICT) returns the number of items in the indexed dictionary.
 
     n = length(idict.get('IT_LIST'));
 end
 function bool = contains(idict, pointer)
-    % CONTAINS checks if an item exists in an indexed dictionary.
+    %CONTAINS checks if an item exists in an indexed dictionary.
     %
-    % BOOL = CONTAINS(IDICT, POINTER) returns true if POINTER (index, key
-    % or item) exists in the indexed dictionary DICT.
+    % BOOL = CONTAINS(IDICT, POINTER) returns true if POINTER (index, key or
+    %  item) exists in the indexed dictionary DICT.
     %
     % See also containsIndex, containsKey, containsItem.
 
@@ -88,10 +98,10 @@ function bool = contains(idict, pointer)
     end
 end
 function bool = containsIndex(idict, index)
-    % CONTAINSINDEX checks if an index exists in an indexed dictionary.
+    %CONTAINSINDEX checks if an index exists in an indexed dictionary.
     %
-    % BOOL = CONTAINS(IDICT, INDEX) returns true if the INDEX exists
-    % in the indexed dictionary IDICT.
+    % BOOL = CONTAINS(IDICT, INDEX) returns true if the INDEX exists in the
+    %  indexed dictionary IDICT.
     %
     % See also contains, containsKey, containsItem.
 
@@ -102,10 +112,10 @@ function bool = containsIndex(idict, index)
     end
 end
 function bool = containsKey(idict, key)
-    % CONTAINSKEY checks if a key exists in an indexed dictionary.
+    %CONTAINSKEY checks if a key exists in an indexed dictionary.
     %
-    % BOOL = CONTAINS(IDICT, KEY) returns true if the KEY exists
-    % in the indexed dictionary DICT.
+    % BOOL = CONTAINS(IDICT, KEY) returns true if the KEY exists in the indexed
+    %  dictionary DICT.
     %
     % See also contains, containsIndex, containsItem.
 
@@ -118,10 +128,10 @@ function bool = containsKey(idict, key)
     end
 end
 function bool = containsItem(idict, item)
-    % CONTAINSITEM checks if an item exists in an indexed dictionary
+    %CONTAINSITEM checks if an item exists in an indexed dictionary
     %
-    % BOOL = CONTAINSITEM(IDICT, ITEM) returns true if ITEM exists
-    % in the indexed dictionary DICT.
+    % BOOL = CONTAINSITEM(IDICT, ITEM) returns true if ITEM exists in the
+    %  indexed dictionary DICT.
     %
     % See also contains, containsIndex, containsKey.
 
@@ -134,10 +144,10 @@ function bool = containsItem(idict, item)
     end
 end
 function index = getIndex(idict, pointer) 
-    % GETINDEX returns the index of a key or item.
+    %GETINDEX returns the index of a key or item.
     %
-    % INDEX = GETINDEX(IDICT, POINTER) returns the index of
-    % a POINTER (a key or item).
+    % INDEX = GETINDEX(IDICT, POINTER) returns the index of a POINTER (a key or
+    %  item).
     %
     % See also getIndexFromItem, getIndexFromKey.
 
@@ -148,7 +158,7 @@ function index = getIndex(idict, pointer)
     end
 end
 function index = getIndexFromKey(idict, key)
-    % GETINDEXFROMKEY returns the index of a key.
+    %GETINDEXFROMKEY returns the index of a key.
     %
     % INDEX = GETINDEXFROMKEY(IDICT, KEY) returns the index of KEY.
     %
@@ -162,10 +172,10 @@ function index = getIndexFromKey(idict, key)
     end
 end
 function index = getIndexFromItem(idict, item)
-    % GETINDEXFROMITEM returns the index of a item.
+    %GETINDEXFROMITEM returns the index of a item.
     %
-    % INDEX = GETINDEXFROMITEM(IDICT, ITEM) returns the index of
-    % the first occurrence of ITEM.
+    % INDEX = GETINDEXFROMITEM(IDICT, ITEM) returns the index of the first
+    %  occurrence of ITEM.
     %
     % See also getIndex, getIndexFromKey.
 
@@ -177,21 +187,19 @@ function index = getIndexFromItem(idict, item)
     end
 end
 function keys = getKeys(idict)
-    % GETKEYS returns all the keys in the indexed dictionary.
+    %GETKEYS returns all the keys in the indexed dictionary.
     %
-    % KEYS = GETKEYS(IDICT) returns all the keys in the indexed
-    % dictionary.
+    % KEYS = GETKEYS(IDICT) returns all the keys in the indexed dictionary.
     %
     % See also getItems.
 
     keys = cellfun(@(x) x.get(idict.get('IT_KEY')), idict.get('IT_LIST'), 'UniformOutput', false);
 end
 function key = getKey(idict, pointer)
-    % GETKEY returns the key of an index or item.
+    %GETKEY returns the key of an index or item.
     %
-    % KEY = GETKEY(IDICT, POINTER) returns the key of POINTER (a
-    % index or item). If the POINTER is a item, it returns the
-    % first occurrence.
+    % KEY = GETKEY(IDICT, POINTER) returns the key of POINTER (a index or
+    %  item). If the POINTER is a item, it returns the first occurrence.
     %
     % See also getKeyFromIndex, getKeyFromItem.
 
@@ -203,7 +211,7 @@ function key = getKey(idict, pointer)
     end
 end
 function key = getKeyFromIndex(idict, index)
-    % GETKEYFROMINDEX returns the key of an index
+    %GETKEYFROMINDEX returns the key of an index
     %
     % KEY = GETKEYFROMINDEX(IDICT, INDEX) returns the key of INDEX.
     %
@@ -213,10 +221,10 @@ function key = getKeyFromIndex(idict, index)
     key = it_list{index}.get(idict.get('IT_KEY'));
 end
 function key = getKeyFromItem(idict, item)
-    % GETKEYFROMITEM returns the key of a item.
+    %GETKEYFROMITEM returns the key of a item.
     %
-    % KEY = GETKEYFROMITEM(IDICT, ITEM) returns the key of the first 
-    % occurrence of ITEM. 
+    % KEY = GETKEYFROMITEM(IDICT, ITEM) returns the key of the first occurrence
+    %  of ITEM.
     %
     % See also getKey, getKeyFromIndex.
 
@@ -225,20 +233,18 @@ function key = getKeyFromItem(idict, item)
     key = it_list{index}.get(idict.get('IT_KEY'));
 end
 function items = getItems(idict)
-    % GETITEMS returns all the items in the indexed dictionary
+    %GETITEMS returns all the items in the indexed dictionary
     %
-    % ITEMS = GETITEMS(IDICT) returns all the items in the
-    % indexed dictionary.
+    % ITEMS = GETITEMS(IDICT) returns all the items in the indexed dictionary.
     %
     % See also getKeys.
 
     items = idict.get('IT_LIST');
 end
 function item = getItem(idict, pointer)
-    % GETITEM returns the item of an index or key.
+    %GETITEM returns the item of an index or key.
     %
-    % ITEM = GETITEM(IDICT, POINTER) returns the item of POINTER
-    % (an index or key).
+    % ITEM = GETITEM(IDICT, POINTER) returns the item of POINTER (an index or key).
     %
     % See also getItemFromIndex, getItemFromKey.
 
@@ -249,7 +255,7 @@ function item = getItem(idict, pointer)
     end            
 end 
 function item = getItemFromIndex(idict, index)    
-    % GETITEMFROMINDEX returns the item of an index.
+    %GETITEMFROMINDEX returns the item of an index.
     %
     % ITEM = GETITEMFROMINDEX(IDICT, INDEX) returns the item of INDEX.
     %
@@ -259,7 +265,7 @@ function item = getItemFromIndex(idict, index)
     item = it_list{index};
 end
 function item = getItemFromKey(idict, key)
-    % GETITEMFROMKEY returns the item of a key.
+    %GETITEMFROMKEY returns the item of a key.
     %
     % ITEM = GETITEMFROMKEY(IDICT, KEY) returns the item of KEY.
     %
@@ -270,11 +276,10 @@ function item = getItemFromKey(idict, key)
 end
 % editing
 function add(idict, item, index)
-    % ADD adds an item and key to an indexed dictionary
+    %ADD adds an item and key to an indexed dictionary
     %
-    % ADD(IDICT, ITEM, INDEX) adds an item and key to the
-    % indexed dictionary in position INDEX. 
-    % If INDEX is empty, it adds it to the end of IDICT.
+    % ADD(IDICT, ITEM, INDEX) adds an item and key to the indexed dictionary in
+    %  position INDEX. If INDEX is empty, it adds it to the end of IDICT.
     %
     % See also remove, replace.
 
@@ -303,10 +308,10 @@ function add(idict, item, index)
     idict.set('IT_LIST', it_list)
 end
 function remove(idict, pointer)            
-    % REMOVE removes a key and item from an indexed dictionary.
+    %REMOVE removes a key and item from an indexed dictionary.
     %
-    % REMOVE(IDICT, POINTER) removes the key and item of POINTER
-    % (an index, key or item) from the indexed dictionary IDICT.
+    % REMOVE(IDICT, POINTER) removes the key and item of POINTER (an index, key
+    %  or item) from the indexed dictionary IDICT.
     %
     % See also add, replace.
 
@@ -325,10 +330,10 @@ function remove(idict, pointer)
     end
 end
 function replace(idict, new_item, index)
-    % REPLACE replaces an item and key in an indexed dictionary.
+    %REPLACE replaces an item and key in an indexed dictionary.
     %
-    % REPLACE(IDICT, NEW_ITEM, INDEX) replaces the item and key 
-    % of INDEX in the indexed dictionary IDICT with NEW_ITEM.
+    % REPLACE(IDICT, NEW_ITEM, INDEX) replaces the item and key of INDEX in the
+    %  indexed dictionary IDICT with NEW_ITEM.
     %
     % See also add, remove, replaceKey, replaceItem.
 
@@ -342,10 +347,10 @@ function replace(idict, new_item, index)
     end
 end
 function replaceKey(idict, old_key, new_key)
-    % REPLACEKEY replaces key in indexed dictionary.
+    %REPLACEKEY replaces key in indexed dictionary.
     %
-    % REPLACEKEY(IDICT, OLD_KEY, NEW_KEY) replaces OLD_KEY in the
-    % indexed dictionary IDICT with NEW_KEY.
+    % REPLACEKEY(IDICT, OLD_KEY, NEW_KEY) replaces OLD_KEY in the indexed
+    %  dictionary IDICT with NEW_KEY.
     %
     % See also replace, replaceItem.
 
@@ -353,11 +358,11 @@ function replaceKey(idict, old_key, new_key)
     item.set(idict.get('IT_KEY'), new_key)
 end
 function replaceItem(idict, old_item, new_item)
-    % REPLACEITEM replaces item in indexed dictionary.
+    %REPLACEITEM replaces item in indexed dictionary.
     %
-    % REPLACEITEM(IDICT, OLD_ITEM, NEW_ITEM) replaces OLD_ITEM
-    % with NEW_ITEM in the indexed dictionary IDICT. It replaces
-    % only the first occurrence of OLD_ITEM.
+    % REPLACEITEM(IDICT, OLD_ITEM, NEW_ITEM) replaces OLD_ITEM with NEW_ITEM in
+    %  the indexed dictionary IDICT. It replaces only the first occurrence of
+    %  OLD_ITEM.
     %
     % See also replace, replaceKey.
 
@@ -365,10 +370,10 @@ function replaceItem(idict, old_item, new_item)
     idict.replace(new_item, index);
 end
 function invert(idict, i, j)
-    % INVERT inverts position of two items in indexed dictionary.
+    %INVERT inverts position of two items in indexed dictionary.
     %
     % INVERT(IDICT, INDEXI, INDEXJ) inverts the positions of the items at
-    % INDEX_I and INDEX_J in the indexed dictionary IDICT.
+    %  INDEX_I and INDEX_J in the indexed dictionary IDICT.
     %
     % See also move_to.
 
@@ -388,10 +393,10 @@ function invert(idict, i, j)
     end
 end
 function move_to(idict, i, j)
-    % MOVE_TO moves an item of an indexed dictionary to another position.
+    %MOVE_TO moves an item of an indexed dictionary to another position.
     %
-    % MOVE_TO(IDICT, OLD_INDEX, NEW_INDEX) moves an item from position 
-    % OLD_INDEX to position NEW_INDEX in the indexed dictionary IDICT.
+    % MOVE_TO(IDICT, OLD_INDEX, NEW_INDEX) moves an item from position
+    %  OLD_INDEX to position NEW_INDEX in the indexed dictionary IDICT.
     %
     % See also invert.
 
@@ -402,11 +407,11 @@ function move_to(idict, i, j)
     end
 end
 function selected = remove_all(idict, selected)
-    % REMOVE_ALL removes selected items.
+    %REMOVE_ALL removes selected items.
     %
-    % SELECTED = REMOVE_ALL(IDICT, SELECTED) removes all items
-    % whose positions in the indexed dictionary DICT are included
-    % in the array SELECTED. It returns an empty array.
+    % SELECTED = REMOVE_ALL(IDICT, SELECTED) removes all items whose positions
+    %  in the indexed dictionary DICT are included in the array SELECTED. It
+    %  returns an empty array.
     %
     % See also move_up, move_down, move_to_top, move_to_bottom.
 
@@ -416,12 +421,11 @@ function selected = remove_all(idict, selected)
     selected = [];
 end
 function selected =  move_up(idict, selected)
-    % MOVE_UP moves up selected items.
+    %MOVE_UP moves up selected items.
     %
-    % SELECTED = MOVE_UP(IDICT, SELECTED) moves up by one
-    % position all items whose positions in the indexed
-    % dictionary DICT are included in the SELECTED array and
-    % returns their final positions. 
+    % SELECTED = MOVE_UP(IDICT, SELECTED) moves up by one position all items
+    %  whose positions in the indexed dictionary DICT are included in the
+    %  SELECTED array and returns their final positions.
     %
     % See also remove_all, move_down, move_to_top, move_to_bottom.
 
@@ -442,12 +446,11 @@ function selected =  move_up(idict, selected)
     end
 end
 function selected = move_down(idict, selected)
-    % MOVE_DOWN moves down selected items.
+    %MOVE_DOWN moves down selected items.
     %
-    % SELECTED = MOVE_DOWN(IDICT, SELECTED) moves down by one
-    % position all items whose positions in the indexed
-    % dictionary DICT are included in the SELECTED array and
-    % returns their final positions.
+    % SELECTED = MOVE_DOWN(IDICT, SELECTED) moves down by one position all
+    %  items whose positions in the indexed dictionary DICT are included in the
+    %  SELECTED array and returns their final positions.  
     %
     % See also remove_all, move_up, move_to_top, move_to_bottom.
 
@@ -467,12 +470,11 @@ function selected = move_down(idict, selected)
     end
 end
 function selected = move_to_top(idict, selected)
-    % MOVE_TO_TOP moves selected items to top.
+    %MOVE_TO_TOP moves selected items to top.
     %
-    % SELECTED = MOVE_TO_TOP(IDICT, SELECTED) moves to top all
-    % items whose positions in the indexed dictionary DICT are
-    % included in the SELECTED array and returns their final
-    % positions.
+    % SELECTED = MOVE_TO_TOP(IDICT, SELECTED) moves to top all items whose
+    %  positions in the indexed dictionary DICT are included in the SELECTED
+    %  array and returns their final positions.
     %
     % See also remove_all, move_up, move_down, move_to_bottom.
 
@@ -484,12 +486,11 @@ function selected = move_to_top(idict, selected)
     end
 end
 function selected = move_to_bottom(idict, selected)
-    % MOVE_TO_BOTTOM moves selected items to bottom.
+    %MOVE_TO_BOTTOM moves selected items to bottom.
     %
-    % SELECTED = MOVE_TO_BOTTOM(IDICT, SELECTED) moves to bottom all
-    % items whose positions in the indexed dictionary DICT
-    % dictionary are included in the SELECTED array and returns
-    % their final positions.
+    % SELECTED = MOVE_TO_BOTTOM(IDICT, SELECTED) moves to bottom all items
+    %  whose positions in the indexed dictionary DICT dictionary are included in
+    %  the SELECTED array and returns their final positions.
     %
     % See also remove_all, move_up, move_down, move_to_top.
 

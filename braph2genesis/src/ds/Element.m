@@ -1,9 +1,89 @@
 classdef Element < Category & Format & matlab.mixin.Copyable
     %Element is the base class for all elements.
-    % Even though it is possible to create instances of Element, typically
+    % Element provides the infrastructure necessary for all elements. Even
+    %  though it is possible to create instances of Element, typically 
     %  one uses its subclasses. It is a subclass of Category, Format,
     %  handle, and matlab.mixin.Copyable.
     %
+    % Each element is essentially a container for a series of properties.
+    %  Each propery has a category (see <a href="matlab:help Category">Category</a>) and a format (see <a href="matlab:help Format">Format</a>).
+    %  Each subelement can implement the following protected methods:
+    %   conditioning - conditions a value before setting a property
+    %   calculateValue - calculates the value of a property
+    %   checkValue - checks the value of a property after it is calculated
+    %   postprocessing - postprocesses the value of a prop after it has been set
+    %
+    % Element methods (inspection, Static):
+    %  getClass - returns the class of the element
+    %  getName - returns the name of the element
+    %  getDescription - returns the description of the element
+    %  getProps - returns the property list of an element
+    %  getPropNumber - returns the property number of an element
+    %  existsProp - checks whether property exists/error
+    %  existsTag - checks whether tag exists/error
+    %  getPropProp - returns the property number of a property
+    %  getPropTag - returns the tag of a property
+    %  getPropCategory - returns the category of a property
+    %  getPropFormat - returns the format of a property
+    %  getPropDescription - returns the description of a property
+    %  getPropSettings - returns the settings of a property
+    %  getPropDefault - returns the default value of a property
+    %  checkProp - checks whether a value has the correct format/error
+    %
+    % Category methods (Static):
+    %  getCategories - returns the list of categories
+    %  getCategoryNumber - returns the number of categories
+    %  existsCategory - returns whether a category exists/error
+    %  getCategoryName - returns the name of a category
+    %  getCategoryDescription - returns the description of a category
+    %
+    % Format methods (Static):
+    %  getFormats - returns the list of formats
+    %  getFormatNumber - returns the number of formats
+    %  existsFormat - returns whether a format exists/error
+    %  getFormatName - returns the name of a format
+    %  getFormatDescription - returns the description of a format
+    %  getFormatSettings - returns the settings for a format
+    %  getFormatDefault - returns the default value for a format
+    %  checkFormat - returns whether a value format is correct/error
+    %
+    % Element constructor:
+    %  Element - constructor
+    %  
+    % Element methods:
+    %  set - sets the value of a property
+    %  check - checks the values of all properties
+    %  getr - returns the raw value of a property
+    %  get - returns the value of a property
+    %  memorize - returns and memorizes the value of a property
+    %  getPropSeed - returns the seed of a property
+    %  isLocked - returns whether a property is locked
+    %  lock - locks unreversibly a property
+    %  isChecked - returns whether a property is checked
+    %  checked - sets a property to checked
+    %  unchecked - sets a property to NOT checked
+    %  
+    % Element methods (operators):
+    %  isequal - determines whether two elements are equal (values, locked)
+    %  
+    % Element methods (display):
+    %  tostring - string with information about the element
+    %  disp - displays information about the element
+    %  tree - displays the element tree
+    %  
+    % Element method (element list):
+    %  getElementList - returns a list with all subelements
+    %  
+    % Element method (JSON encode):
+    %  encodeJSON - returns a JSON string encoding the element
+    %  
+    % Element method (JSON decode, Static):
+    %  decodeJSON - returns a JSON string encoding the element
+    %
+    % Element methods (copy):
+    %  copy - copies the element
+    %  clone - clones the element
+
     % See also Category, Format, NoValue, Callback, IndexedDictionary, handle, matlab.mixin.Copyable.
 
     properties (Access=private)
@@ -512,7 +592,41 @@ classdef Element < Category & Format & matlab.mixin.Copyable
     end
     methods % set/check/get/seed/locked/checked
         function set(el, varargin)
-            % varargin = {prop/tag, value, ...}
+            %SET sets the value of a property.
+            %
+            % SET(EL, POINTER1, VALUE1, POINTER2, VALUE2, ...) sets the value of
+            %  POINTER1 to VALUE1, POINTER2 to VALUE2, ... where the pointers can be
+            %  either property numbers or property tags.
+            %
+            % Each property is conditioned before being set (by calling the protected
+            %  function <a href="matlab:help Element.conditioning">conditioning</a>, which is defined in each subelement) and all
+            %  properties are postprocessed after being set (by calling the protected
+            %  function <a href="matlab:help Element.postprocessing">postprocessing</a>, which is defined in each subelement).
+            %
+            % If a property is checked, its format is checked before proceeding to its
+            %  setting by calling <a href="matlab:help Format.checkFormat">Format.checkFormat</a>. 
+            %  If the check fails, the property is not set and an error is thrown.
+            %  Error id: [BRAPH2:<Element Class>:WrongInput]
+            %
+            % If any property is checked, the method Element.check() is called after
+            %  all settings are made and the consistency of the values of all
+            %  properties is checked. If the check fails an error is thrown.
+            %  Error id: [BRAPH2:<Element Class>:WrongInput]
+            %
+            % It the property is Category.PARAMETER or Category.DATA, the value is set
+            %  only if the property is unlocked. If an attempt is made to set a locked
+            %  property, no setting occurs and a warning is thrown.
+            %  Warning id: [BRAPH2:<Element Class>]
+            % If the value is a Callback, a warning is thrown if the element,
+            %  property number and/or settings of the callback do not coincide with
+            %  those of the property.
+            %  Warning id: [BRAPH2:<Element Class>]
+            %
+            % If the property is Category.RESULT, the value can only be set to
+            %  NoValue()
+            %
+            % See also get, getr, memorize, check, isChecked, checked, unchecked,
+            % isLocked, lock, Callback.
 
             % backup properties (if any prop is checked)
             checked = el.getPropNumber() && any(cellfun(@(x) x.checked, el.props));
@@ -603,7 +717,20 @@ classdef Element < Category & Format & matlab.mixin.Copyable
                 end
             end
         end
-        function [element_check, element_msg] = check(el, varargin)
+        function [element_check, element_msg] = check(el)
+            %CHECK checks the values of all properties.
+            %
+            % [CHECK, MSG] = CHECK(EL) checks the values of all properties of element
+            %  EL. It returns a flag CHECK (true = passed check; false = failed check)
+            %  and a message MSG. The check is performed by calling the protected
+            %  function <a href="matlab:help Element.checkValue">checkValue</a>, which is defined in each subclass. By default
+            %  checkValue does not make any check.
+            %
+            % CHECK(EL) checks the values of all properties of element EL and thorws an
+            %  error if the check fails.
+            %  Error id: [BRAPH2:<Element Class>:BugErr]
+            %
+            % See also isChecked, checked, unchecked, set, get, getr, memorize.
 
             value_checks = ones(el.getPropNumber(), true);
             value_msgs = repmat({''}, el.getPropNumber(), 1);
@@ -661,13 +788,10 @@ classdef Element < Category & Format & matlab.mixin.Copyable
             end
         end
         function value = getr(el, pointer)
-            %GETR returns the row value of a property.
+            %GETR returns the raw value of a property.
             %
-            % VALUE = GETR(EL, PROP) returns the row value of property PROP
-            %  of element EL.
-            %
-            % VALUE = GETR(EL, TAG) returns the row value of property TAG
-            %  of element EL.
+            % VALUE = GETR(EL, POINTER) returns the raw value of property POINTER of
+            %  element EL. POINTER can be either a property number (PROP) or tag (TAG).
             %
             % See also get, memorize, set, check.
             
@@ -676,7 +800,30 @@ classdef Element < Category & Format & matlab.mixin.Copyable
             value = el.props{prop}.value; % raw element value
         end
         function value = get(el, pointer)
-            % prop can also be tag
+            %GET returns the value of a property.
+            %
+            % VALUE = GET(EL, POINTER) returns the value of property POINTER of element
+            %  EL. POINTER can be either a property number (PROP) or tag (TAG).
+            %
+            % If the raw value of the property is a NoValue, it proceed to return the
+            %  default property value (for Category.METADATA, Category.PARAMETER, and
+            %  Category.DATA).
+            %
+            % If the raw value of the property is a Callback, it retrieves the value of
+            %  the linked property (for Category.PARAMETER, and
+            %  Category.DATA).
+            %
+            % If a result is not calculated (i.e., its raw value is NoValue), it
+            %  proceeds to calculate it (but NOT memorize it). After the calculation
+            %  all properties of Category.PARAMETER, and Category.DATA are irreversibly
+            %  locked. 
+            % If the property is checked, it proceeds to check all properties
+            %  after the calculation calling the function <a href="matlab:help Element.check">check</a>.
+            %  if the check fails, it resets the property to NoValue, returns NoValue,
+            %  does not lockthe property, and throws an warning.
+            %  Warning id: [BRAPH2:<Element Class>]
+            % 
+            % See also getr, memorize, set, check, NoValue, Callback, getPropDefault, lock.
 
             prop = el.getPropProp(pointer);
             
@@ -727,7 +874,15 @@ classdef Element < Category & Format & matlab.mixin.Copyable
             end
         end
         function value = memorize(el, pointer)
-            % prop can also be tag
+            %MEMORIZE returns and memorizes the value of a property.
+            %
+            % VALUE = MEMORIZE(EL, POINTER) returns and memorize the value of property POINTER of
+            %  element EL. POINTER can be either a property number (PROP) or tag (TAG).
+            % 
+            % It calls the function <a href="matlab:help Element.check">check</a> and
+            %  proceed to save the result if the property is Category.RESULT.
+            %
+            % See also get, getr, set, check.
 
             prop = el.getPropProp(pointer);
             
@@ -738,20 +893,47 @@ classdef Element < Category & Format & matlab.mixin.Copyable
             end
         end
         function seed = getPropSeed(el, pointer)
+            %GETPROPSEED returns the seed of a property.
+            %
+            % SEED = GETPROPSEED(EL, POINTER) returns the seed of property POINTER of
+            %  element EL. POINTER can be either a property number (PROP) or tag (TAG).
+            %
+            % The seed of each property is a 32-bit unsigned integer and is initialized
+            %  when an element is constructed by calling randi(intmax('uint32')).
+            % 
+            % See also randi.
             
             prop = el.getPropProp(pointer);
 
             seed = el.props{prop}.seed;
         end
         function locked = isLocked(el, pointer)
-            % prop can also be tag
+            %ISLOCKED returns whether a property is locked.
+            %
+            % LOCKED = ISLOCKED(EL, POINTER) returns whether the property POINTER of
+            %  element EL is locked. POINTER can be either a property number (PROP) or
+            %  tag (TAG).
+            %
+            % Properties can be locked by the user using the function <a href="matalb:help Element.lock">lock</a>.
+            % All properties with Category.PARAMETER and Category.DATA are
+            %  automatically locked as soon as the first result is calculated.
+            %  Afterwards they cannot be unlocked. If an element with unlocked
+            %  properties is needed, it it possible to clone the element using the
+            %  function <a href="matalb:help Element.clone">clone</a>.
+            %
+            % See also lock.
 
             prop = el.getPropProp(pointer);
             
             locked = el.props{prop}.locked;
         end
         function lock(el, pointer)
-            % prop can also be tag
+            %LOCK locks unreversibly a property.
+            %
+            % LOCK(EL, POINTER) locks unreversibly the property POINTER of element EL.
+            %  POINTER can be either a property number (PROP) or tag (TAG).
+            %
+            % See also isLocked.
 
             if nargin < 2
                 for prop = 1:1:el.getPropNumber()
@@ -775,14 +957,28 @@ classdef Element < Category & Format & matlab.mixin.Copyable
             end
         end
         function checked = isChecked(el, pointer)
-            % prop can also be tag
+            %ISCHECKED returns whether a property is checked.
+            %
+            % CHECKED = ISCHECKED(EL, POINTER) returns whether the property POINTER of
+            %  element EL is checked. POINTER can be either a property number (PROP) or
+            %  tag (TAG).
+            %
+            % Checked properties are checked both for format and value when they are
+            %  set (<a href="matalb:help Element.set">set</a>) and calculated (<a href="matalb:help Element.get">get</a>).
+            %
+            % See also checked, unchecked.
 
             prop = el.getPropProp(pointer);
             
             checked = el.props{prop}.checked;
         end
         function checked(el, pointer)
-            % prop can also be tag
+            %CHECKED sets a property to checked.
+            %
+            % CHECKED(EL, POINTER) sets the property POINTER of element EL to checked.
+            %  POINTER can be either a property number (PROP) or tag (TAG).
+            %
+            % See also unchecked, isChecked.
 
             if nargin < 2
                 for prop = 1:1:el.getPropNumber()
@@ -797,14 +993,19 @@ classdef Element < Category & Format & matlab.mixin.Copyable
                     value = el.getr(prop);
                     if isa(value, 'Element')
                         value.checked();
-                    elseif iscell(value) && all(cellfun(@(x) isa(x, 'Element'), value))
+                    elseif iscell(value) && all(all(cellfun(@(x) isa(x, 'Element'), value)))
                         cellfun(@(x) x.checked(), value)
                     end
                 end
             end
         end
         function unchecked(el, pointer)
-            % prop can also be tag
+            %UNCHECKED sets a property to NOT checked.
+            %
+            % UNCHECKED(EL, POINTER) sets the property POINTER of element EL to NOT checked.
+            %  POINTER can be either a property number (PROP) or tag (TAG).
+            %
+            % See also checked, isChecked.
 
             if nargin < 2
                 for prop = 1:1:el.getPropNumber()
@@ -819,7 +1020,7 @@ classdef Element < Category & Format & matlab.mixin.Copyable
                     value = el.getr(prop);
                     if isa(value, 'Element')
                         value.unchecked();
-                    elseif iscell(value) && all(cellfun(@(x) isa(x, 'Element'), value))
+                    elseif iscell(value) && all(all(cellfun(@(x) isa(x, 'Element'), value)))
                         cellfun(@(x) x.unchecked(), value)
                     end
                 end
@@ -828,6 +1029,14 @@ classdef Element < Category & Format & matlab.mixin.Copyable
     end
     methods % operators
         function check = isequal(el1, el2)
+            %ISEQUAL determines whether two elements are equal (values, locked).
+            %
+            % CHECK = ISEQUAL(EL1, EL2) determines whether elements EL1 and EL2 are
+            %  equal in terms of values and locked status.
+            %  POINTER can be either a property number (PROP) or tag (TAG).
+            %
+            % Note that, instead, El1 == El2 detemines whether the two handles EL1 and
+            %  EL2 refer to the very same element.
             
             check = isa(el2, el1.getClass());
             
@@ -840,27 +1049,69 @@ classdef Element < Category & Format & matlab.mixin.Copyable
     end
     methods (Access=protected) % conditioning
         function value = conditioning(el, prop, value) %#ok<INUSL>
-            % returns the same value
+            %CONDITIONING conditions a value before setting a property.
+            %
+            % VALUE = CONDITIONING(EL, PROP, VALUE) conditions the value VALUE before
+            %  it is set as the value of the property PROP. This function by default
+            %  does not do anything and should be implemented in the subclasses of
+            %  Element when needed.
+            %
+            % See also set, postprocessing, calculateValue, checkValue.
         end
     end
     methods (Access=protected) % postprocessing
         function postprocessing(el, prop) %#ok<*INUSD>
-            % no action
+            %POSTPROCESSING postprocesses the value of a prop after it has been set.
+            %
+            % POSTPROCESSING(EL, PROP) conditions the value of the property PROP. This
+            %  function by default does not do anything and should be implemented in
+            %  the subclasses of Element when needed.
+            %
+            % See also set, conditioning, calculateValue, checkValue.
         end
     end
     methods (Access=protected) % check value
         function [value_check, value_msg] = checkValue(el, prop, value)
+            %CHECKVALUE checks the value of a property after it is calculated.
+            %
+            % [CHECK, MSG] = CONDITCHECKVALUEIONING(EL, PROP, VALUE) checks the value
+            %  of the property PROP after it is calculated. This function by default
+            %  returns a CHECK = true and MSG = ''. It should be implemented in the
+            %  subclasses of Element when needed.
+            %
+            % See also check, set, conditioning, postprocessing, checkValue.
+
             value_check = true;
             value_msg = '';
         end
     end
     methods (Access=protected) % calculate value
         function value = calculateValue(el, prop)
+            %CALCULATEVALUE calculates the value of a property.
+            %
+            % VALUE = CALCULATEVALUE(EL, PROP) calculates the value of the property
+            %  PROP. Works only with properties with Category.RESULT. By default
+            %  this function returns the default value for the prop and should be
+            %  implemented in the subclasses of Element when needed.
+            %
+            % See also getDefault, set, conditioning, postprocessing, checkValue.
+
             value = el.getPropDefault(prop);
         end
     end
     methods % display
         function str = tostring(el, varargin)
+            %TOSTRING string with information about the element.
+            %
+            % STR = TOSTRING(EL) returns a string with information about the element.
+            %
+            % STR = TOSTRING(EL, N) trims the string to the first N characters.
+            %
+            % STR = TOSTRING(EL, N, ENDING) ends the string with ENDING if it has
+            %  been trimmed.
+            %
+            % See also disp, tree.
+
             if el.getPropNumber() > 0
                 % str = char(join([class(el) 'with properties' cellfun(@(prod) el.getPropTag(prod), num2cell(Element.getProps(el)'), 'UniformOutput', false)]));
                 str = [class(el) ' with ' int2str(el.getPropNumber()) ' properties ' el.getPropTag(1) ' = ' tostring(el.get(1)) '.'];
@@ -871,32 +1122,31 @@ classdef Element < Category & Format & matlab.mixin.Copyable
             str = str(2:1:end-1);
         end
         function disp(el)
+            % DISP displays information about the element.
+            %
+            % DISP(EL) displays information about the element.
+            %
+            % See also tostring, tree.
 
             disp(['<a href="matlab:help ' class(el) '">' class(el) '</a>']);
             el.tree(0)
-            
-            % for prop = 1:1:el.getPropNumber()
-            %     if ~el.isLocked(prop)
-            %         disp([upper(el.getPropTag(prop)) ...
-            %             ' (' ...
-            %             Category.getCategoryName(el.getPropCategory(prop)) ...
-            %             ', ' ...
-            %             Format.getFormatName(el.getPropFormat(prop)) ...
-            %             ') = ' ...
-            %             tostring(el.getr(prop))])
-            %     else % prop locked
-            %         disp([upper(el.getPropTag(prop)) ...
-            %             ' (' ...
-            %             Category.getCategoryName(el.getPropCategory(prop)) ...
-            %             ', ' ...
-            %             Format.getFormatName(el.getPropFormat(prop)) ...
-            %             ', locked' ...
-            %             ') = ' ...
-            %             tostring(el.getr(prop))])
-            %     end
-            % end
         end
         function txt_output = tree(el, level, prop_list, n, ending)
+            %TREE displays the element tree.
+            %
+            % TREE(EL) displays the first level of the element tree.
+            %
+            % TREE(EL, LEVEL) displays a number LEVEL of the levels of the element tree.
+            %
+            % TREE(EL, [], PROPS) displays only PROPS at the first level.
+            %
+            % TREE(EL, [], [], N[, ENDING]) trims the string of each property to the
+            %  first N characters and, optionally, ends the string with ENDING if it
+            %  has been trimmed.
+            %
+            % STR = TREE(EL) returns the element tree as a string.
+            %
+            % See also tostring, tree.  
                         
             if nargin < 5
                 ending = ' ...';
@@ -965,7 +1215,7 @@ classdef Element < Category & Format & matlab.mixin.Copyable
                                 sprintf(['  ' lines{i} '\n']) ... % indent
                                 ]; %#ok<AGROW>
                         end                    
-                    elseif iscell(value) && all(cellfun(@(x) isa(x, 'Element'), value))
+                    elseif iscell(value) && all(all(cellfun(@(x) isa(x, 'Element'), value)))
                         for i = 1:1:length(value)
                             txt_el = [txt_el ...
                                 sprintf(['  index:<strong>' int2str(i) '</strong> item:']) ... % indent
@@ -996,6 +1246,16 @@ classdef Element < Category & Format & matlab.mixin.Copyable
     end
     methods % el_list
         function el_list = getElementList(el, el_list)
+            %GETELEMETLIST returns a list with all subelements.
+            %
+            % LIST = GETELEMETLIST(EL) returns a list with all subelements of element
+            %  EL (including EL itself).
+            %
+            % LIST = GETELEMETLIST(EL, LIST) appends the subelements of element EL
+            %  (including EL itself) to LIST. This form of the function is mainly used
+            %  internally within the class Element.
+            %
+            % See also encodeJSON, decodeJSON, copy, clone.
 
             if nargin < 2
                 el_list = {};
@@ -1010,7 +1270,7 @@ classdef Element < Category & Format & matlab.mixin.Copyable
                 
                 if isa(value, 'Element')
                     el_list = value.getElementList(el_list);
-                elseif iscell(value) && all(cellfun(@(x) isa(x, 'Element'), value))
+                elseif iscell(value) && all(all(cellfun(@(x) isa(x, 'Element'), value)))
                     for i = 1:1:length(value)
                         el_list = value{i}.getElementList(el_list);
                     end
@@ -1019,97 +1279,157 @@ classdef Element < Category & Format & matlab.mixin.Copyable
         end        
     end
     methods % encodeJSON
-%         function [json, struct, el_list] = encodeJSON(el) %#ok<STOUT>
-%             
-%             el_list = el.getElementList();
-%             
-%             for i = 1:1:length(el_list)
-%                 el = el_list{i};
-%                 
-%                 eval(['struct{i}.class = ''' el.getClass() ''';'])
-%                 
-%                 for prop = 1:1:el.getPropNumber()
-%                     value = el.getr(prop);
-%                     
-%                     switch el.getPropFormat(prop)
-%                         case {Format.EMPTY, Format.STRING, Format.OPTION, Format.CLASS}
-%                             json_str = regexprep(tostring(value), '''', '''''');
-%                         case {Format.LOGICAL, Format.SCALAR, Format.RVECTOR, Format.CVECTOR, Format.MATRIX, Format.SMATRIX}
-%                             json_str = mat2str(value);
-%                         case Format.CLASSLIST
-%                             json_str = '{';
-%                             for j = 1:1:length(value)
-%                                 json_str = [json_str ' ''' value{j} ''' ']; %#ok<AGROW>
-%                             end
-%                             json_str = [json_str '}']; %#ok<AGROW>
-%                             json_str = regexprep(tostring(json_str), '''', '''''');
-%                         case {Format.ITEM, Format.IDICT}
-%                             json_str = int2str(find(cellfun(@(x) value == x, el_list)));
-%                         case Format.ITEMLIST
-%                             indices = zeros(1, length(value));
-%                             for j = 1:1:length(value)
-%                                 indices(j) = find(cellfun(@(x) value{j} == x, el_list));
-%                             end
-%                             json_str = mat2str(indices);
-%                         case Format.ADJACENCY
-%                             % TODO correct this once Format.ADJACENCY is finalized
-%                             json_str = mat2str(value);
-%                         case Format.MEASURE
-%                             % TODO correct this once Format.MEASURE is finalized
-%                             json_str = mat2str(value);
-%                     end
-%                     eval(['struct{i}.props{prop}.value = ''' json_str ''';'])
-%                     eval(['struct{i}.props{prop}.locked = ' mat2str(el.isLocked(prop)) ';'])
-%                 end
-%             end
-% 
-%             json = jsonencode(struct);
-%         end
+        function [json, struct, el_list] = encodeJSON(el)
+            %ENCODEJSON returns a JSON string encoding the element.
+            %
+            % JSON = ENCODEJSON(EL) returns a JSON string encoding the element EL.
+            %
+            % See also decodeJSON.
+            
+            el_list = el.getElementList();
+            
+            for i = 1:1:length(el_list)
+                el = el_list{i};
+                
+                struct{i}.class = el.getClass(); %#ok<AGROW>
+                
+                for prop = 1:1:el.getPropNumber()
+                    value = el.getr(prop);
+
+                    struct{i}.props{prop}.prop = prop;
+                    struct{i}.props{prop}.tag = el.getPropTag(prop);
+                    
+                    if isa(value, 'NoValue')
+                        struct{i}.props{prop}.value = find(cellfun(@(x) value == x, el_list));
+                    else
+                        switch el.getPropFormat(prop)
+                            case Format.EMPTY
+                                struct{i}.props{prop}.value = regexprep(tostring(value), '''', '''''');
+                            case {Format.STRING, Format.OPTION, Format.CLASS}
+                                struct{i}.props{prop}.value = regexprep(tostring(value), '''', '''''');
+                            case {Format.LOGICAL, Format.SCALAR, Format.RVECTOR, Format.CVECTOR, Format.MATRIX, Format.SMATRIX}
+                                struct{i}.props{prop}.value = mat2str(value);
+                            case Format.CLASSLIST
+                                json_str = '{';
+                                for j = 1:1:length(value)
+                                    json_str = [json_str ' ''' value{j} ''' ']; %#ok<AGROW>
+                                end
+                                json_str = [json_str '}']; %#ok<AGROW>
+                                struct{i}.props{prop}.value = json_str;
+                            case {Format.ITEM, Format.IDICT}
+                                struct{i}.props{prop}.value = find(cellfun(@(x) value == x, el_list));
+                            case Format.ITEMLIST
+                                indices = zeros(1, length(value));
+                                for j = 1:1:length(value)
+                                    indices(j) = find(cellfun(@(x) value{j} == x, el_list));
+                                end
+                                struct{i}.props{prop}.value = indices;
+                            case Format.CELL
+                                json_str = '{';
+                                for j = 1:1:size(value, 1)
+                                    for k = 1:1:size(value, 2)
+                                        if k < size(value, 2)
+                                            json_str = [json_str mat2str(value{j, k}) ', ']; %#ok<AGROW>
+                                        elseif j < size(value, 1)
+                                            json_str = [json_str mat2str(value{j, k}) '; ']; %#ok<AGROW>
+                                        else
+                                            json_str = [json_str mat2str(value{j, k})]; %#ok<AGROW>
+                                        end
+                                    end
+                                end
+                                json_str = [json_str '}']; %#ok<AGROW>
+                                struct{i}.props{prop}.value = json_str;
+                        end
+                    end
+                    struct{i}.props{prop}.seed = el.getPropSeed(prop);
+                    struct{i}.props{prop}.locked = el.isLocked(prop);
+                    struct{i}.props{prop}.checked = el.isChecked(prop);
+                end
+            end
+
+            json = jsonencode(struct);
+        end
     end
     methods (Static) % decodeJSON
-%         function [el, struct, el_list] = decodeJSON(json)
-%             
-%             struct = jsondecode(json);
-% 
-%             % creates empty elements
-%             el_list = cell(length(struct), 1);
-%             for i = 1:1:length(struct)
-%                 el_list{i} = eval([struct{i}.class '()']);
-%             end
-%             
-%             % fills in props
-%             for i = 1:1:length(el_list)
-%                 el = el_list{i};
-%                 
-%                 for prop = 1:1:el.getPropNumber()
-%                     switch el.getPropFormat(prop)
-%                         case {Format.EMPTY, Format.STRING, Format.OPTION, Format.CLASS}
-%                             el.props{prop}.value = struct{i}.props(prop).value;
-%                         case {Format.LOGICAL, Format.SCALAR, Format.RVECTOR, Format.CVECTOR, Format.MATRIX, Format.SMATRIX}
-%                             el.props{prop}.value = eval(struct{i}.props(prop).value);
-%                         case Format.CLASSLIST
-%                             el.props{prop}.value = eval(struct{i}.props(prop).value(2:end-1));
-%                         case {Format.ITEM, Format.IDICT}
-%                             el.props{prop}.value = el_list(eval(struct{i}.props(prop).value));
-%                         case Format.ITEMLIST
-%                             indices = eval(struct{i}.props(prop).value);
-%                             el.props{prop}.value = el_list(indices);
-%                         case Format.ADJACENCY
-%                             % TODO correct this once Format.ADJACENCY is finalized
-%                             el.props{prop}.value = eval(struct{i}.props(prop).value);
-%                         case Format.MEASURE
-%                             % TODO correct this once Format.MEASURE is finalized
-%                             el.props{prop}.value = eval(struct{i}.props(prop).value);
-%                     end
-%                     el.props{prop}.value = struct{i}.props(prop).locked;
-%                 end
-%             end
-%             
-%             el = el_list{1};
-%         end
+        function [el, struct, el_list] = decodeJSON(json)
+            %DECODEJSON returns a JSON string encoding the element.
+            %
+            % EL = DECODEJSON(JSON) returns the element EL decoding the a JSON string.
+            %
+            % See also encodeJSON.
+            
+            struct = jsondecode(json);
+            
+            % manages special case when only one element
+            if length(struct) == 1
+                struct_tmp{1}.class = struct.class;
+                if isfield(struct, 'prop')
+                    struct_tmp{1}.props = struct.props;
+                end
+                struct = struct_tmp;
+                clear struct_tmp
+            end
+
+            % creates empty elements
+            el_list = cell(length(struct), 1);
+            for i = 1:1:length(struct)
+                el_class = struct{i}.class;
+                if strcmp(el_class, 'NoValue')
+                    el_list{i} = NoValue.getNoValue();
+                else
+                    el_list{i} = eval([el_class '()']);
+                end
+            end
+            
+            % fills in props
+            for i = 1:1:length(el_list)
+                el = el_list{i};
+
+                for prop = 1:1:el.getPropNumber()
+                    value = struct{i}.props(prop).value;
+                    if isnumeric(value)
+                        if length(value) == 1 % also case {Format.ITEM, Format.IDICT}
+                            el.props{prop}.value = el_list{value};
+                        else % also case Format.ITEMLIST
+                            indices = value;
+                            el.props{prop}.value = el_list(indices)';
+                        end
+                    else
+                        switch el.getPropFormat(prop)
+                            case Format.EMPTY
+                                el.props{prop}.value = eval(value);
+                            case {Format.STRING, Format.OPTION, Format.CLASS}
+                                el.props{prop}.value = eval(value(2:end-1));
+                            case {Format.LOGICAL, Format.SCALAR, Format.RVECTOR, Format.CVECTOR, Format.MATRIX, Format.SMATRIX}
+                                el.props{prop}.value = eval(value);
+                            case Format.CLASSLIST
+                                el.props{prop}.value = eval(value);
+                                % case {Format.ITEM, Format.IDICT}
+                                %     el.props{prop}.value = el_list{value};
+                                % case Format.ITEMLIST
+                                %     indices = value;
+                                %     el.props{prop}.value = el_list(indices);
+                            case Format.CELL
+                                el.props{prop}.value = eval(value);
+                        end
+                    end
+                    el.props{prop}.seed = uint32(struct{i}.props(prop).seed);
+                    el.props{prop}.locked = struct{i}.props(prop).locked;
+                    el.props{prop}.checked = struct{i}.props(prop).checked;
+                end
+            end
+            
+            el = el_list{1};
+        end
     end
     methods (Access=protected) % deep copy
         function el_copy = copyElement(el)
+            %COPYELEMENT copies the element.
+            %
+            % EL_COPY = COPYELEMENT(EL) copies the element EL making a deep copy of all
+            %  its properties.
+            %
+            % See also copy, clone.
 
             el_list = el.getElementList();
             
@@ -1135,7 +1455,7 @@ classdef Element < Category & Format & matlab.mixin.Copyable
 
                     if isa(value, 'Element')
                         el_copy_list{i}.props{prop}.value = el_copy_list{cellfun(@(x) x == value, el_list)};
-                    elseif iscell(value) && all(cellfun(@(x) isa(x, 'Element'), value))
+                    elseif iscell(value) && all(all(cellfun(@(x) isa(x, 'Element'), value)))
                         for j = 1:1:length(value)
                             el_copy_list{i}.props{prop}.value{j} = el_copy_list{cellfun(@(x) x == value{j}, el_list)};
                         end
@@ -1148,12 +1468,27 @@ classdef Element < Category & Format & matlab.mixin.Copyable
     end
     methods % clone
         function el_clone = clone(el)
+            %CLONE clones the element.
+            %
+            % EL_COPY = CLONE(EL) clones the element EL. The cloning operation makes a
+            %  deep copy of the element including all properties with Category.METADATA
+            %  and Category.PARAMETER and the checked status.
+            %  The properties with Category.DATA and Category.RESULT are set to
+            %  NoValue, the seeds are randomized, and all properties are unlocked.
+            %
+            % See also copy.
+            
             el_clone = el.copy();
             
             el_list = el_clone.getElementList();
             for i = 1:1:length(el_list)
                 el = el_list{i};
                 for prop = 1:1:el.getPropNumber()
+                    switch el.getPropCategory(prop)
+                        case {Category.METADATA, Category.PARAMETER}
+                        case {Category.DATA, Category.RESULT}
+                        el.props{prop}.value = NoValue.getNoValue();
+                    end
                     el.props{prop}.seed = randi(intmax('uint32'));
                     el.props{prop}.locked = false;
                 end

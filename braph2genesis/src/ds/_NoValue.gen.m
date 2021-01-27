@@ -31,3 +31,49 @@ function nv = getNoValue()
     end
     nv = local_nv;
 end
+
+%% ¡tests!
+
+%%% ¡test!
+%%%% ¡name!
+Copy
+%%%% ¡code!
+nv = NoValue.getNoValue();
+
+nv_copy = nv.copy();
+
+assert( ...
+    nv == nv_copy, ...
+    [BRAPH2.STR ':NoValue:' BRAPH2.BUG_COPY], ...
+    ['The copy of a NoValue must return a pointer to the persistent NoValue.getNoValue().'] ...
+    )
+
+%%% ¡test!
+%%%% ¡name!
+Clone
+%%%% ¡code!
+nv = NoValue.getNoValue();
+
+nv_clone = nv.clone();
+
+assert( ...
+    nv == nv_clone, ...
+    [BRAPH2.STR ':NoValue:' BRAPH2.BUG_CLONE], ...
+    ['The clone of a NoValue must return a pointer to the persistent NoValue.getNoValue().'] ...
+    )
+
+%%% ¡test!
+%%%% ¡name!
+JSON
+%%%% ¡code!
+nv = NoValue.getNoValue();
+
+json = nv.encodeJSON();
+
+nv_json = NoValue.decodeJSON(json);
+
+assert( ...
+    nv == nv_json, ...
+    [BRAPH2.STR ':NoValue:' BRAPH2.BUG_JSON], ...
+    ['The encoding/decoding of a NoValue must return a pointer to the persistent NoValue.getNoValue().'] ...
+    )
