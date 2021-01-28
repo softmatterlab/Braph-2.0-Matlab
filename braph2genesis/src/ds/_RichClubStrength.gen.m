@@ -14,6 +14,10 @@ A (data, cell) is a cell with an adjacency matrix, it is a data, cell.
 
 %%% ¡prop!
 rcs_parameter (data, scalar) is a positive number greater than 1. It is a data, scalar.
+%%%% ¡conditioning!
+if value <= 0
+    value = 1;
+end
 %%%% ¡check_prop!
 check = value > 0;
 %%%% ¡default!
