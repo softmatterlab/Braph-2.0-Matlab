@@ -50,3 +50,12 @@ for li = 1:1:L
     RCS(li) = {rich_club_strength};
 end
 value = RCS;
+
+
+
+id = 'TRIAL';
+label = 'Brain Atlas';
+notes = 'Brain atlas notes';
+brain_regions = {br1, br2, br3, br4, br5};
+atlas = BrainAtlas('ID', id, 'LABEL', label, 'NOTES', notes, 'BR_DICT', idcit);
+
