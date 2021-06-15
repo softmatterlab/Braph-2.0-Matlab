@@ -79,6 +79,8 @@ CP_DICT (result, idict) contains the results of the comparison.
 'ComparisonEnsemble'
 %%%% ¡calculate!
 value = IndexedDictionary('IT_CLASS', 'ComparisonEnsemble', 'IT_KEY', 4);
+%%%% ¡gui!
+pl = PPCompareEnsembleCP('EL', c, 'PROP', CompareEnsemble.CP_DICT, varargin{:});
 
 %% ¡methods!
 function cp = getComparison(c, measure_class, varargin)

@@ -54,6 +54,7 @@ IndexedDictionary('IT_CLASS', 'MultiplexWU')
 g_dict = IndexedDictionary('IT_CLASS', 'MultiplexWU');
 
 gr = a.get('GR');
+atlas = gr.get('SUB_DICT').getItem(1).get('BA');
 T = a.get('REPETITION');
 fmin = a.get('FREQUENCYRULEMIN');
 fmax = a.get('FREQUENCYRULEMAX');
@@ -80,7 +81,8 @@ for i = 1:1:gr.get('SUB_DICT').length()
     
     g = MultiplexWU( ...
         'ID', ['g ' sub.get('ID')], ...
-        'B', A ...
+        'B', A, ...
+        'BRAINATLAS', atlas ...
         );
     g_dict.add(g)
 end

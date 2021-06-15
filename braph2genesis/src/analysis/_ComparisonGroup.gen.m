@@ -33,6 +33,8 @@ DIFF (result, cell) is the group comparison value.
 %%%% ¡calculate!
 [diff, p1, p2, ci_lower, ci_upper] = calculate_results(cp);
 value = diff;
+%%%% ¡gui!
+pl = PPComparisonGroupDiff('EL', cp, 'PROP', ComparisonGroup.DIFF, varargin{:});
 
 %%% ¡prop!
 P1 (result, cell) is the one-tailed p-value.

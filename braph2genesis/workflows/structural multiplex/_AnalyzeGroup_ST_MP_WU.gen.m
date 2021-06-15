@@ -46,6 +46,7 @@ MultiplexWU()
 %%%% ¡calculate!
 gr = a.get('GR');
 data_list = cellfun(@(x) x.get('ST_MP'), gr.get('SUB_DICT').getItems, 'UniformOutput', false);
+atlas = gr.get('SUB_DICT').getItem(1).get('BA');
 
 if a.get('USE_COVARIATES')
     age_list = cellfun(@(x) x.get('age'), gr.get('SUB_DICT').getItems, 'UniformOutput', false);
@@ -92,6 +93,7 @@ end
 
 g = MultiplexWU( ...
     'ID', ['g ' gr.get('ID')], ...
+    'BRAINATLAS', atlas, ...
     'B', A ...
     );
 

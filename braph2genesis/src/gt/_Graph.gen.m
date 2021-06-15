@@ -21,6 +21,11 @@ LABEL (metadata, string) is an extended label of the graph.
 NOTES (metadata, string) are some specific notes about the graph.
 
 %%% ¡prop!
+BRAINATLAS (data, item) is a atlas associated with the graph.
+%%%% ¡settings!
+'BrainAtlas'
+
+%%% ¡prop!
 A (result, cell) is the graph adjacency matrix. 
 %%%% ¡calculate!
 value = {};

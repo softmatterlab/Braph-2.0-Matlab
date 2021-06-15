@@ -188,6 +188,10 @@ function h_panel = draw(pl, varargin)
                 measure = calculate_measure_list{i};
                 waitbar(progress, f, ['Calculating measure: ' measure ' ...']);
                 result_measure{i} = g.getMeasure(measure);
+                
+                % precalculate
+                g.getMeasure(measure).memorize('M');
+                
                 waitbar(extra, f, ['Measure: ' measure ' Calculated! ...']);
             end
             
