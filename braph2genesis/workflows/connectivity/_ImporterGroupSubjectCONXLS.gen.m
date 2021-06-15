@@ -93,11 +93,13 @@ if isfolder(directory)
 
         subdict = gr.get('SUB_DICT');
         
+        waitbar(.3, f, 'Processing your data ...')
+        n = length(files);
+        
         % adds subjects
-        for i = 1:1:length(files)
-            if i == floor(length(files)/2)
-                waitbar(.70, f, 'Almost there ...')
-            end
+        for i = 1:1:n
+            progress = (.65 * i ) / n;
+            waitbar(.3 + progress, f, ['Loading Brain region: ' num2str(i) ' ...'])
             % read file
             CON = xlsread(fullfile(directory, files(i).name));
             [~, sub_id] = fileparts(files(i).name);

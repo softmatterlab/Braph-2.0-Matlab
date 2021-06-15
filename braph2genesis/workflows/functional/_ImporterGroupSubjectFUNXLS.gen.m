@@ -78,12 +78,11 @@ if isfolder(directory)
     if length(files) > 0
         
         % adds subjects
-        for i = 1:1:length(files)
-            if i == 1
-                waitbar(.45, f, 'Processing your data ...')
-            elseif i == floor(length(files)/2)
-                waitbar(.70, f, 'Almost there ...')
-            end
+        waitbar(.3, f, 'Processing your data ...')
+        n = length(files);
+        for i = 1:1:n
+            progress = (.65 * i ) / n;
+            waitbar(.3 + progress, f, ['Loading Brain region: ' num2str(i) ' ...'])
             
             % read file
             FUN = xlsread(fullfile(directory, files(i).name));

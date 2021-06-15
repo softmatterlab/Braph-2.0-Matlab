@@ -72,7 +72,7 @@ if isfile(file)
     );
 
     % brain atlas
-    waitbar(.45, f, 'Processing your data ...')
+    waitbar(.25, f, 'Processing your data ...')
     ba = im.get('BA');
     br_number = size(raw, 2) - 3;
     if ba.get('BR_DICT').length ~= br_number
@@ -89,10 +89,11 @@ if isfile(file)
     subdict = gr.get('SUB_DICT');
     
     % adds subjects
-    for i = 2:1:size(raw, 1)
-        if i == floor(size(raw, 1)/2)
-            waitbar(.70, f, 'Almost there ...')
-        end
+    waitbar(.35, f, 'Loading Subjects ...')
+    n = size(raw, 1);
+    for i = 2:1:n
+        progress = (.65 * i) / n ;
+        waitbar(.35 + progress, f, ['Loading Subject: ' num2str(i) '...'])
         ST = zeros(br_number, 1);
         for j = 1:1:length(ST)
             ST(j) = raw{i, 3 + j};

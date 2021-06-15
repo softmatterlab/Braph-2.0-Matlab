@@ -169,9 +169,9 @@ function h_panel = draw(pl, varargin)
             set_icon(f)
 
             n = length(calculate_measure_list);
-            for j = 1:length(calculate_measure_list)
-                progress = (.85 / n) + (.8* j / n);                
-                extra = (.85 / n) + (.8 * j / n) + (.05 / n);
+            for j = 1:n
+                progress = (.85 * i )/ n;   
+                extra = progress * 1.1;
                 measure = calculate_measure_list{j};
                 waitbar(progress, f, ['Measure: ' measure '  ...']);
                 result_measure{j} = el.getMeasureEnsemble(measure); %#ok<AGROW>

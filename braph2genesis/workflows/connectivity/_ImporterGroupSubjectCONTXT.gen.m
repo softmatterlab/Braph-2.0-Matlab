@@ -89,11 +89,12 @@ if isfolder(directory)
         subdict = gr.get('SUB_DICT');
         
         % adds subjects
+        waitbar(.3, f, 'Processing your data ...')
+        n = length(files);
         for i = 1:1:length(files)
             % read file
-            if i == floor(length(files)/2)
-                waitbar(.70, f, 'Almost there ...')
-            end
+            progress = (.65 * i ) / n;
+            waitbar(.3 + progress, f, ['Loading Brain region: ' num2str(i) ' ...'])
             CON = table2array(readtable(fullfile(directory, files(i).name), 'Delimiter', '	'));
             [~, sub_id] = fileparts(files(i).name);
             sub = SubjectCON( ...

@@ -77,10 +77,10 @@ if isfolder(directory)
         subdict = gr.get('SUB_DICT');
         
         % adds subjects
-        for i = 1:1:length(files)
-            if i == floor(length(files)/2)
-                waitbar(.70, f, 'Almost there ...')
-            end
+        n = length(files);
+        for i = 1:1:n
+            progress = (.65 * i ) / n;
+            waitbar(.3 + progress, f, ['Loading Brain region: ' num2str(i) ' ...'])
             % read file
             FUN = table2array(readtable(fullfile(directory, files(i).name), 'Delimiter', '	'));
             

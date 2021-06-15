@@ -171,9 +171,10 @@ function h_panel = draw(pl, varargin)
             % calculate
             f = waitbar(0, ['Calculating ' num2str(length(calculate_measure_list))  ' comparisons ...'], 'Name', BRAPH2.NAME);
             set_icon(f)
-            for i = 1:length(calculate_measure_list)
-                progress = (1 / (length(calculate_measure_list) * .9)) * i;   
-                extra = (1 / (length(calculate_measure_list) * .9)) * 1.5;
+            n = length(calculate_measure_list);
+            for i = 1:n
+                progress = (.85 * i )/ n;   
+                extra = progress * 1.1;
                 measure = calculate_measure_list{i};
                 waitbar(progress, f, ['Calculating comparison: ' measure ' ...']);               
                 
